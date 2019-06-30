@@ -22,7 +22,7 @@ import java.util.Map;
 @Path("/sessions")
 public class SessionResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionResource.class);
-    private Client httpClient = ClientBuilder.newClient();
+    private Client httpClient = ClientBuilder.newClient().register(ObjectMapperProvider.class);
 
     @GET
     @Path("{sessionId}")
