@@ -27,33 +27,25 @@ public class SessionResource {
     @GET
     @Path("{sessionId}")
     public Session getSessionStatus(@PathParam("sessionId") ObjectId sessionId) {
-        //return CrawlDatabaseManager.instance.getSessionById(sessionId);
-        throw new UnsupportedOperationException("Not implemented yet");
-    }
-
-    @GET
-    @Path("/print")
-    @Produces(MediaType.APPLICATION_JSON)
-    public String printSomething() {
-        return "Echo echo.. check";
+        return CrawlDatabaseManager.instance.getSessionById(sessionId);
     }
 
     @POST
     @Path("/crawl")
     @Produces(MediaType.APPLICATION_JSON)
-    public Map<String, ObjectId> startCrawlSession() {
+    public Session startCrawlSession() {
         return startSession(SecretManager.instance.getCrawlerEndpoint());
     }
 
     @POST
     @Path("/scrape")
     @Produces(MediaType.APPLICATION_JSON)
-    public Map<String, ObjectId> startScrapeSession() {
+    public Session startScrapeSession() {
         LOGGER.error("Starting to scrape...");
         return startSession(SecretManager.instance.getScraperEndpoint());
     }
 
-    private Map<String, ObjectId> startSession(String endpoint) {
+    private Session startSession(String endpoint) {
         Map<String, ObjectId> startedJobs = new HashMap<>();
         for (Site site : CrawlDatabaseManager.instance.getAllSites()) {
             if (!CrawlDatabaseManager.instance.isThereAnyJobRunningOnDomain(site)) {
@@ -73,12 +65,12 @@ public class SessionResource {
                 if (response.getStatus() == 202) {
                     Job responseJob = response.readEntity(Job.class);
                     startedJobs.put(site.getDomain(), responseJob.getId());
+                } else {
+                    LOGGER.warn("Could not start job on domain {} with status {}", site.getDomain(), response.getStatus());
                 }
-            } else {
-                startedJobs.put(site.getDomain(), null);
             }
         }
-        return startedJobs;
-    }
 
+        return new Session(startedJobs);
+    }
 }
