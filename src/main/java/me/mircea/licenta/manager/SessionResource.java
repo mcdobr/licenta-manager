@@ -56,6 +56,8 @@ public class SessionResource {
                 for (String seed : site.getSeeds())
                     seedList.add(seed);
 
+                crawlRequestBody.put("disallowCookies", site.getDisallowCookies());
+
                 WebTarget crawlerTarget = httpClient.target(endpoint);
                 Invocation.Builder invocationBuilder = crawlerTarget.path("/jobs")
                         .request(MediaType.APPLICATION_JSON);
